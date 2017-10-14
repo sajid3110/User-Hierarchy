@@ -13,6 +13,7 @@ use app\models\BasUserSearch;
 use app\models\BasUser;
 use app\models\Roles;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Json;
 
 class SiteController extends Controller
 {
@@ -83,11 +84,17 @@ class SiteController extends Controller
     {
         $managers = $this->fetchEmployees($id,'child_id');
         $employees = $this->fetchEmployees($id,'parent_id');
+        $arr = [];
+        $model = BasUser::find()->select("user_name")->all();
+        for ($i=0; $i <sizeof($model) ; $i++) { 
+            $arr[$i] = $model[$i]['user_name'];
+        } 
 
         return $this->render('view', [
             'model' => $this->findModel($id),
             'managers' => $managers,
-            'employees' => $employees
+            'employees' => $employees,
+            'data' => $arr
         ]);
     }
 
@@ -114,6 +121,15 @@ class SiteController extends Controller
        $managers = (new \yii\db\Query())->select('*')->from('bas_user')->where(['user_id'=>$b]);
        $man = $managers->createCommand()->queryAll();
        return $man;
+    }
+
+    public function actionReportingRights()
+    {
+        $this->enableCsrfValidation = false;
+        $data = Yii::$app->request->post('data');
+        $mydata = json_decode($data , true);
+
+        echo $mydata['name'];
     }
 
     /**
