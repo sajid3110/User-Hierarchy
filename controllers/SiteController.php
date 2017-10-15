@@ -86,6 +86,7 @@ class SiteController extends Controller
         $employees = $this->fetchEmployees($id,'parent_id');
         $arr = [];
         $model = BasUser::find()->select("user_name")->all();
+        
         for ($i=0; $i <sizeof($model) ; $i++) { 
             $arr[$i] = $model[$i]['user_name'];
         } 
@@ -128,8 +129,48 @@ class SiteController extends Controller
         $this->enableCsrfValidation = false;
         $data = Yii::$app->request->post('data');
         $mydata = json_decode($data , true);
+        $roles = new Roles();
+        $model = BasUser::findOne(['user_name'=>$mydata['name']]);
+        $connection = Yii::$app->db;
 
-        echo $mydata['name'];
+        if(($mydata['operation'] == 'manager-add') || ($mydata['operation'] == 'manager-edit') || ($mydata['operation'] == 'manager-delete'))
+        {
+            $parent_id = $model->user_id;
+            $child_id = $mydata['user'];
+            if($mydata['operation'] == 'manager-add'){
+                $roles->parent_id = $parent_id;
+                $roles->child_id = $child_id;
+                if($roles->save())
+                echo "Added Manager";
+            }
+            else if($mydata['operation'] == 'manager-delete'){
+                if(Yii::$app->db->createCommand('DELETE FROM roles WHERE parent_id = ' . $parent_id . ' and child_id = ' . $child_id)->execute())
+                echo "Deleted Manager";
+            }
+            else if($mydata['operation'] == 'manager-edit'){
+                $this->redirect('index.php?r=site/update&id=' . $parent_id);
+                // echo "edit not implemented yet";
+            }
+              
+        }
+        else
+        {
+            $parent_id = $mydata['user'];
+            $child_id = $model->user_id;
+            if($mydata['operation'] == 'employee-add'){
+                $roles->parent_id = $parent_id;
+                $roles->child_id = $child_id;
+                if($roles->save())
+                echo "Added Employee";
+            }
+            else if($mydata['operation'] == 'employee-delete'){
+                if(Yii::$app->db->createCommand('DELETE FROM roles WHERE parent_id = ' . $parent_id . ' and child_id = ' . $child_id)->execute())
+                echo "Deleted Employee";
+            }
+            else if($mydata['operation'] == 'employee-edit'){
+                $this->redirect('index.php?r=site/update&id=' . $child_id);
+            }
+        }
     }
 
     /**

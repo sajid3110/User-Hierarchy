@@ -50,9 +50,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <h4>Users Reporting To <?= ucfirst($model->user_name); ?></h4> 
             <form>
                 <?php 
-                    echo Typeahead::widget([
+                    if(sizeof($data)>0){
+                        echo Typeahead::widget([
                         'name' => 'employee-name',
-                        'options' => ['placeholder' => 'Enter Manager' , 'id'=>'employee-name'],
+                        'options' => ['placeholder' => 'Enter Employee' , 'id'=>'employee-name'],
                         'pluginOptions' => ['highlight'=>true],
                         'dataset' => [
                             [
@@ -61,6 +62,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         ]
                     ]);
+                    }
+                    else{
+                        echo "There are no employees";
+                    }
+                    
                 ?>
                 <br/>
                 <?= Html::button($content = 'Add', $options = ['class'=>'btn btn-success btn-sm' , 'id'=>'employee-add']); ?>
@@ -73,9 +79,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <h4>Users To Whom <?= ucfirst($model->user_name); ?> Reports To</h4> 
             <form>
                 <?php 
-                    echo Typeahead::widget([
+                    if(sizeof($data)>0){
+                        echo Typeahead::widget([
                         'name' => 'manager-name',
-                        'options' => ['placeholder' => 'Enter Employee' , 'id'=>'manager-name'],
+                        'options' => ['placeholder' => 'Enter Manager' , 'id'=>'manager-name'],
                         'pluginOptions' => ['highlight'=>true],
                         'dataset' => [
                             [
@@ -84,6 +91,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         ]
                     ]);
+                    }
+                    else{
+                        echo "There are no managers";
+                    }
+                    
                 ?>
                 <br/>
                 <?= Html::button($content = 'Add', $options = ['class'=>'btn btn-success btn-sm' , 'id'=>'manager-add']); ?>
@@ -124,7 +136,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </table>
                 <?php } 
                     else{ ?>
-                    <h3 align="center">No Employees</h3>
+                    <h3 align="center">No Managers</h3>
                 <?php    }
                 ?>
 
@@ -171,42 +183,48 @@ $script = <<<JS
         $('#manager-add').click(function(){
             var answerJson = {
                 'name':$('#manager-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' :  $model->user_id 
             };
             submit(answerJson);
         });
         $('#manager-edit').click(function(){
             var answerJson = {
                 'name':$('#manager-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' :  $model->user_id 
             };
             submit(answerJson);
         });
         $('#manager-delete').click(function(){
             var answerJson = {
                 'name':$('#manager-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' :  $model->user_id 
             };
             submit(answerJson);
         });
         $('#employee-add').click(function(){
             var answerJson = {
                 'name':$('#employee-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' :  $model->user_id 
             };
             submit(answerJson);
         });
         $('#employee-edit').click(function(){
             var answerJson = {
                 'name':$('#employee-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' : $model->user_id
             };
             submit(answerJson);
         });
         $('#employee-delete').click(function(){
             var answerJson = {
                 'name':$('#employee-name').val(),
-                'operation' : this.id
+                'operation' : this.id,
+                'user' : $model->user_id 
             };
             submit(answerJson);
         });
@@ -222,6 +240,7 @@ $script = <<<JS
                         _csrf: yii.getCsrfToken(),
                     } , function(data){
                            alert(data);
+                           location.reload();
                     });
                     
     }
